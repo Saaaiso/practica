@@ -3,4 +3,3 @@
 GET {{server_HostAddress}}/weatherforecast/
 Accept: application/json
 
-###

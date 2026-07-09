@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+# Секреты (docker-compose, GLPI, БД и т.д.)
+.env
+.env.*
+!.env.example
+
+# Node / React (на случай если фронтенд в том же репозитории)
+node_modules/
+dist/

@@ -1,4 +1,5 @@
-﻿using server;
+﻿using server.Models;
+using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
@@ -97,21 +98,47 @@ public class GlpiClient
     {
         await EnsureTokenAsync();
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseurl}/api.php/Assistance/Ticket");
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
-        request.Headers.TryAddWithoutValidation("Range", "0-999");
+        var allTickets = new List<GlpiDate>();
 
-        var response = await _http.SendAsync(request);
-
-        if (!response.IsSuccessStatusCode)
+        int start = 0;
+        int limit = 100;
+        int total = int.MaxValue;
+        while (start < total)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"GLPI error {response.StatusCode}: {error}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseurl}/api.php/Assistance/Ticket?start={start}&limit={limit}");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
+
+            var response = await _http.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"GLPI error {response.StatusCode}: {error}");
+            }
+
+            response.EnsureSuccessStatusCode();
+
+
+            if(response.Content.Headers.TryGetValues("Content-Range", out var values))
+            {
+                var contentRange = values.First();
+                total = int.Parse(contentRange.Split('/').Last());
+            }
+
+            var pageTickets = await response.Content.ReadFromJsonAsync<List<GlpiDate>>();
+
+            if (pageTickets != null && pageTickets.Count == 0)
+                break;
+
+            allTickets.AddRange(pageTickets);
+
+            Console.WriteLine($"Загружено {allTickets.Count} из {total}");
+
+            start += limit;
+            
         }
 
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<List<GlpiDate>>();
+        return allTickets;
     }
 }
 

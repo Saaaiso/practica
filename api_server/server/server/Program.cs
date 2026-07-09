@@ -1,35 +1,40 @@
 using Microsoft.AspNetCore.Identity;
-using server;
 
 using Microsoft.EntityFrameworkCore;
+using server.Data;
+using server.Repositories;
 
-var glpi = new GlpiClient(
-    baseUrl: "http://localhost",
-    clientId: "0c6f5281bdc21ceb7e9023bb1762e0a68fc3ebd15ebcbe2f910c6187aeda9833",
-    clientSecret: "67034eee34dac705c9c3fddceb142bdc34bb6d9b3aec00aab0ec0d2824df5850",
-    userName: "samatbek _admin",
-    password: "Samsa2007"
-    );
 
-try
-{
-    var tickets = await glpi.GetTicketsAsync();
 
-    foreach ( var ticket in tickets )
-    {
-        Console.WriteLine( $"{ticket.Id}, {ticket.Type}, {ticket.Priority}" );
-    }
-
-}
-catch (Exception ex) { 
-    Console.WriteLine(ex.ToString());
-}
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddScoped(sp => new GlpiClient(
+    baseUrl: builder.Configuration["Glpi:BaseUrl"],
+    clientId: builder.Configuration["Glpi:ClientId"],
+    clientSecret: builder.Configuration["Glpi:ClientSecret"],
+    userName: builder.Configuration["Glpi:Username"],
+    password: builder.Configuration["Glpi:Password"]
+));
+
+
+builder.Services.AddScoped<ComputerRepository>();
+
+builder.Services.AddControllers();
+
 var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
 
 Console.ReadLine();
