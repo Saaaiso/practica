@@ -17,9 +17,9 @@ from datetime import datetime, timedelta
 
 # ==================== НАСТРОЙКИ ====================
 
-GLPI_URL = "http://localhost/api.php/v1"
-APP_TOKEN = "Qr9v9ld1btSmDAAfnPE3b7VWg8oXI6ZLxNkj4a5Z"
-USER_TOKEN = "E6aSWlssGGfeNTyNptKJZHJZkPLTakFvHtEfp8mM"
+GLPI_URL = ""
+APP_TOKEN = ""
+USER_TOKEN = ""
 
 TOTAL_TICKETS = 1000
 DAYS_RANGE = 30  
