@@ -1,4 +1,6 @@
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.Expressions.Internal;
+using server.Data;
+using server.Services;
 using System.Net.Sockets;
 using System.Text.Json.Serialization;
 
@@ -35,7 +37,7 @@ namespace server.Models
         public int Id { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; } = null!;
+        public string Title { get; set; } = null!;
 
         [JsonPropertyName("priority")]
         public GlpiTicketPriority Priority { get; set; }
@@ -43,11 +45,23 @@ namespace server.Models
         [JsonPropertyName("type")]
         public GlpiTicketType Type { get; set; }
 
-        [JsonPropertyName("date")]
+        [JsonPropertyName("date_creation")]
+        [JsonConverter(typeof(UtcDateTimeConverter))]
         public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("status")]
         public GlpiStatus Status { get; set; } = null!;
     }
+    public class TypeMonthStatsDto
+    {
+        public string Type { get; set; }
+        public List<MonthStatDto> Months { get; set; }
+    }
 
+    public class MonthStatDto
+    {
+        public string Month { get; set; }
+        public int Count { get; set; }
+    }
 }
+

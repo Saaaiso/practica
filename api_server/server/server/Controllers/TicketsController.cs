@@ -10,39 +10,44 @@ namespace server.Controllers
     [Route("[controller]")]
     public class TicketsController : ControllerBase
     {
-        private readonly ComputerRepository _tcontext;
+        private readonly TicketsRepository _tcontext;
 
-        public TicketsController(ComputerRepository tcontext)
+        public TicketsController(TicketsRepository tcontext)
         {
             _tcontext = tcontext;
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> GetTickets()
-        {
-            var tickets = await _tcontext.GetAllAsync();
-            return Ok(tickets);
-        }
-
 
         [HttpGet("stats-by-month")]
         public async Task<IActionResult> GetMonthlyStats()
         {
-            var tickets = await _tcontext.GetAllAsync();
+            var tickets = await _tcontext.GetMonthlyStatsAsync();
+            return Ok(tickets);
+        }
 
 
-            var stats = tickets
-                .GroupBy(t => new { t.CreatedAt.Year, t.CreatedAt.Month})
-                .Select(g => new
-                {
-                    Month = $"{g.Key.Year}:{g.Key.Month:D2}",
-                    Count = g.Count()
-                })
-                .OrderBy(s => s.Month)
-                .ToList();
-
+        [HttpGet("stats-by-type-and-month")]
+        public async Task<IActionResult> GetStatsByTypeAndMonth()
+        {
+            var stats = await _tcontext.GetStatsByTypeAndMonthAsync();
             return Ok(stats);
         }
+
+
+        [HttpPost("glpi_synk_tickets")]
+        public async Task<IActionResult> SynkTickets()
+        {
+            try
+            {
+                var count = await _tcontext.SyncAllAsync();
+                return Ok(new { message = $"Синхронизировано {count} тикетов" });
+            }
+            catch (Exception ex)
+            {
+                // залогировать ex
+                return StatusCode(502, new { message = "Не удалось синхронизировать с GLPI" });
+            }
+        }
     }
-}
+ }

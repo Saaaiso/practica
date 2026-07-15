@@ -38,7 +38,41 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TICKETS_DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  backend:
+    build:
+      context: ./api_server/server/server
+      dockerfile: Dockerfile
+    container_name: api_server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${TICKETS_DB_NAME};Username=${TICKETS_DB_USER};Password=${TICKETS_DB_PASSWORD}"
+      Glpi__BaseUrl: "http://glpi"
+      Glpi__ClientId: ${GLPI_CLIENT_ID}
+      Glpi__ClientSecret: ${GLPI_CLIENT_SECRET}
+      Glpi__Username: ${GLPI_ADMIN_USER}
+      Glpi__Password: ${GLPI_ADMIN_PASSWORD}
+      ASPNETCORE_URLS: "http://+:8080"
+    ports:
+      - "5237:8080"
 
+  frontend:
+    build:
+      context: ./fronted
+      dockerfile: Dockerfile
+    container_name: react_app
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
 volumes:
   glpi_data:
   db_data:
