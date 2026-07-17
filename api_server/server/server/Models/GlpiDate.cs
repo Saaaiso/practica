@@ -52,16 +52,5 @@ namespace server.Models
         [JsonPropertyName("status")]
         public GlpiStatus Status { get; set; } = null!;
     }
-    public class TypeMonthStatsDto
-    {
-        public string Type { get; set; }
-        public List<MonthStatDto> Months { get; set; }
-    }
-
-    public class MonthStatDto
-    {
-        public string Month { get; set; }
-        public int Count { get; set; }
-    }
 }
 

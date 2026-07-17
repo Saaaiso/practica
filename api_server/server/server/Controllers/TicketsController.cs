@@ -10,9 +10,9 @@ namespace server.Controllers
     [Route("[controller]")]
     public class TicketsController : ControllerBase
     {
-        private readonly TicketsRepository _tcontext;
+        private readonly ITicketRepository _tcontext;
 
-        public TicketsController(TicketsRepository tcontext)
+        public TicketsController(ITicketRepository tcontext)
         {
             _tcontext = tcontext;
         }
@@ -48,6 +48,20 @@ namespace server.Controllers
                 // залогировать ex
                 return StatusCode(502, new { message = "Не удалось синхронизировать с GLPI" });
             }
+        }
+
+        [HttpGet("stats-by-type-and-day")]
+        public async Task<IActionResult> GetStatsByTypeAndDay()
+        {
+            var stats = await _tcontext.GetStatsTypeAndDays();
+            return Ok(stats);
+        }
+
+        [HttpGet("stats-by-type-and-priority")]
+        public async Task<IActionResult> GetTypeAndPrioruty()
+        {
+            var result = await _tcontext.GetTypePriorityAsync();
+            return Ok(result);
         }
     }
  }

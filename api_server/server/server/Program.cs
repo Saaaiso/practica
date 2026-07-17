@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 
 using Microsoft.EntityFrameworkCore;
+using server;
 using server.Data;
 using server.Repositories;
 using server.Services;
@@ -25,7 +26,7 @@ builder.Services.AddScoped(sp => new GlpiClient(
 ));
 
 builder.Services.AddScoped<TicketSyncService>();
-builder.Services.AddScoped<TicketsRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketsRepository>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
